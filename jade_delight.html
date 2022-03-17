@@ -190,7 +190,7 @@ function td(content, className="")
 	}
 	
 	function openWindow(){
-		var myWindow = window.open("", "MsgWindow", "width=200,height=100");
+		var myWindow = window.open("", "MsgWindow");
 		myWindow.document.write("<p>" + "Thank You For Your Order!" + "</p>");
 		for(i = 0; i < menuItems.length; i++){
 			myWindow.document.write(printItem(document.getElementsByTagName("tr")[i], i));
