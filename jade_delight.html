@@ -7,9 +7,10 @@
 	.body {
 		display: inline;
 	}
-	input[name=street], input[name=city]{
+	p[class="userInfo address"] {
 		display: none;
 	}
+	
 </style>
 </head>
 
@@ -98,6 +99,7 @@ function td(content, className="")
 
 </form>
 <script>
+	var method = "pickup";
 	document.querySelectorAll('input[type=button]')[0].addEventListener('click', function(){
 		if (document.getElementsByName('lname')[0].value == null || document.getElementsByName('lname')[0].value.length == 0){
 			alert("Must Have Last Name");
@@ -109,6 +111,7 @@ function td(content, className="")
 		}
 		if ((document.getElementsByName("phone")[0].value.length != 7 && document.getElementsByName("phone")[0].value.length != 10)){
 			alert("Must Have Valid Phone Number");
+			return;
 		}
 		if (document.getElementsByName("p_or_d")[1].checked == true){
 			if (document.getElementsByName('street')[0].value == null || document.getElementsByName('street')[0].value.length == 0){
@@ -120,17 +123,24 @@ function td(content, className="")
 			return;
 		}
 		}
-		openWindow();
+		if (document.getElementById("subtotal").value == 0){
+			alert("Must Have At Least 1 Item Ordered");
+			return;
+		}
 		alert("Thank Your For Your Order!");
+		openWindow();
+		
 	})
 	
 	document.getElementsByName("p_or_d")[1].addEventListener("change", function(){
-			document.getElementsByName("street")[0].style.display = "inline";
-			document.getElementsByName("city")[0].style.display = "inline";
+			document.getElementsByClassName("userInfo address")[0].style.display = "block";
+			document.getElementsByClassName("userInfo address")[1].style.display = "block";
+			method = "delivery";
 	})
 	document.getElementsByName("p_or_d")[0].addEventListener("change", function(){
-			document.getElementsByName("street")[0].style.display = "none";
-			document.getElementsByName("city")[0].style.display = "none";
+			document.getElementsByClassName("userInfo address")[0].style.display = "none";
+			document.getElementsByClassName("userInfo address")[1].style.display = "none";
+			method = "pickup";
 	})
 	
 	for (i = 0; i < menuItems.length; i++){
@@ -154,38 +164,33 @@ function td(content, className="")
 		updateAmounts();
 		myWindow.document.write("<div>" + "<strong>" + "Subtotal: " + "</strong>" + document.getElementById("subtotal").value + "</div>" + "<div>" + "<strong>" + "Tax (6.25%): " + "</strong>" + document.getElementById("tax").value + "</div>" + "<div>" + "<strong>" + "Total: " + "</strong>" + document.getElementById("total").value + "</div>");
 		
-		myWindow.document.write("Time Until your Food is Ready: " + getTime("delivery"));
+		myWindow.document.write(getTime(method));
 	}
 	
-	async function getTime(method){
-		var headers = {};
-		let responce = await fetch("https://www.timeapi.io/api/Time/current/zone?timeZone=est", {
-        method : "GET",
-        mode: 'cors',
-        headers: headers
-    });
-		let data = await responce.json();
-		
-		var hour = data.hour;
+	function getTime(method){
+		var today = new Date();
+		var hour = today.getHours();
+		var mins = today.getMinutes();
+		var s;
 		
 		if (method == "delivery"){
-			var min = data.minute + 30;
-			
-			if (min > 59){
-				hour++;
-				min - 60;
-			}
-			return (hour + ":" + min);
+			mins += 30;
+			s = "Order Will be Deliverd At: ";
 		} else {
-			var min = data.minute + 15;
-			
-			if (min > 59){
-				hour++;
-				min -= 60;
-			}
-			return (hour + ":" + min);
+			mins += 15;
+			s = "Order Can Be Picked Up At: ";
 		}
-			
+		
+		if(mins > 59){
+			hour ++;
+			mins -= 60;
+		}
+		if(mins < 10){
+			mins = "0" + mins;
+		}
+		
+		s += hour + ":" + mins;
+		return s;
 		};
 	
 	function printItem(item, i){
